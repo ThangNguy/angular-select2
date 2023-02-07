@@ -130,7 +130,7 @@ export class SmplSelect2Directive implements ControlValueAccessor, OnInit, OnCha
   }
 
   private _setup() {
-
+    this._overwriteAttachPositioningHandler();
     this._initConfigOptions();
 
     this._registerSelectEvent();
@@ -140,6 +140,37 @@ export class SmplSelect2Directive implements ControlValueAccessor, OnInit, OnCha
     this._setupTemplateSelectionFunction();
 
     this._renderData();
+  }
+
+  private _overwriteAttachPositioningHandler() {
+    $.fn.select2.amd.require(['select2/dropdown/attachBody', 'select2/utils'], (AttachBody, Utils) => {
+      AttachBody.prototype._attachPositioningHandler = function (decorated, container) {
+        const self = this;
+        const scrollEvent = 'scroll.select2.' + container.id;
+        const resizeEvent = 'resize.select2.' + container.id;
+        const orientationEvent = 'orientationchange.select2.' + container.id;
+        const $watchers = this.$container.parents().filter(Utils.hasScroll);
+        console.log(this);
+        $watchers.each(function () {
+          $(this).data('select2-scroll-position', {
+            x: $(this).scrollLeft(),
+            y: $(this).scrollTop()
+          });
+        });
+        $watchers.on(scrollEvent, function (ev) {
+          var position = $(this).data('select2-scroll-position');
+          if ($(this).find('.select2-container--open').length > 0) {
+            $(this).scrollTop(position.y);
+          }
+        });
+        $(window).on(scrollEvent + ' ' + resizeEvent + ' ' + orientationEvent,
+          function (e) {
+            self._positionDropdown();
+            self._resizeDropdown();
+          }
+        );
+      };
+    });
   }
 
   private _initConfigOptions(): void {
