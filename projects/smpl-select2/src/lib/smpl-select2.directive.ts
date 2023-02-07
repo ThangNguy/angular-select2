@@ -150,7 +150,7 @@ export class SmplSelect2Directive implements ControlValueAccessor, OnInit, OnCha
         const resizeEvent = 'resize.select2.' + container.id;
         const orientationEvent = 'orientationchange.select2.' + container.id;
         const $watchers = this.$container.parents().filter(Utils.hasScroll);
-        console.log(this);
+
         $watchers.each(function () {
           $(this).data('select2-scroll-position', {
             x: $(this).scrollLeft(),
